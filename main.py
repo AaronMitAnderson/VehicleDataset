@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from urllib3 import Timeout
 
 def get_carmax_page_api():
   """Get data for a page of 20 vehicles from the CarMax API."""
@@ -12,20 +13,49 @@ def get_carmax_page_api():
   distance = '1'
   maxMilage = '80000'
 
-  page_url = f'https://shoppersapp-gateway.carmax.com/api/search/results?Take={numResultsShown}&UserStoreId={storeID}&StoreId={storeID}&ZipCode={zipCode}&SearchText={searchText}&Distance={distance}&MileageMax={maxMilage}'
-  # page_url = f'https://www.carmax.com/cars/api/search/run?uri=%2Fcars%3Fmileage%3D80000%26search%3DTruck&skip=0&take=50&zipCode=28226&radius=40&shipping=0&sort=20&scoringProfile=BestMatchScoreVariant3'
+  # DEPRECIATED
+  # ________________________
+  # # page_url = f'https://shoppersapp-gateway.carmax.com/api/search/results?Take={numResultsShown}&UserStoreId={storeID}&StoreId={storeID}&ZipCode={zipCode}&SearchText={searchText}&Distance={distance}&MileageMax={maxMilage}'
+  # page_url = "https://www.carmax.com/cars/api/search/run?uri=%2Fcars%3Fsearch%3DTruck&skip=0&take=48&zipCode=28226&radius=40&shipping=0&sort=20&scoringProfile=BestMatchScoreVariant3&visitorID=6ec4db73-f249-497a-9735-48ca92858ffd"
+  # print(page_url)
+  # response = requests.get(page_url)
+  # print("Response Received")
+  # ________________________
+
+  page_url = f'https://www.carmax.com/cars/api/search/run?uri=%2Fcars%3Fsearch%3DTruck&skip=0&take=100&zipCode=28226&radius=40&shipping=0&sort=20'
+
+  payload={}
+  headers = {'Accept': '*/*',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Connection': 'keep-alive',
+    'Content-Type': 'application/json',
+    'DNT': '1',
+    'Host': 'www.carmax.com',
+    'Referer': 'https://www.carmax.com/cars/all',
+    'apikey': 'adfb3ba2-b212-411e-89e1-35adab91b600',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-origin',
+    'TE': 'trailers',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:96.0) Gecko/20100101 Firefox/96.0'
+  }
   print(page_url)
-  response = requests.get(page_url)
-  print("Response Received")
+  try:
+    response = requests.request("GET", page_url, headers=headers, data=payload, timeout=10)
+  except TimeoutError:
+    print('Request Timeout')
+  else:
+    print("Response Received")
+    # print(response.text)
 
   # get JSON from requests and return the results subsection
   # print(response.json()['results'][0:]['stockNumber'])
   listOfStockNumbers = []
-  results = response.json()['results']
-  for x in results:
-    if x['type'] == 'vehicle':
-      if x['transferInfo']['isTransferable'] == True:
-        listOfStockNumbers.append(x['stockNumber'])
+  vehicles = response.json()['items']
+  for vehicle in vehicles:
+    if vehicle['isTransferable'] == True:
+      listOfStockNumbers.append(vehicle['stockNumber'])
     
   print(listOfStockNumbers)
   # for stockNumber in listOfStockNumbers:
@@ -75,9 +105,9 @@ def getDictofCars(listOfStock):
       print(misprice)
 
 def main():
-  listOfCars = get_carmax_page_api()
+  listOfStock = get_carmax_page_api()
   print()
-  getDictofCars(listOfCars)
+  getDictofCars(listOfStock)
 
 if __name__ == "__main__":
   main()
