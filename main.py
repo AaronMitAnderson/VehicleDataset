@@ -61,7 +61,7 @@ def getDictofCars(listOfStock, vehicles):
     carDict = {"StockNumber": vehicle['stockNumber'],
                "Price" : vehicle['basePrice'],
                "MSRP" : vehicle['msrp'],
-               "Markdown" : vehicle['currentMarkdown'],
+              #  "Markdown" : vehicle['currentMarkdown'],
                "Type" : Type,
                "Drive Train" : vehicle['driveTrain'],
                "Location" : vehicle['storeName']+ " " + vehicle['storeCity'],
