@@ -1,15 +1,26 @@
-from itertools import count
 import requests
 from bs4 import BeautifulSoup
 import csv
+import sys
 
 def get_page(starting_value = 0):
   """Get data for a page of 100 vehicles from the CarMax API."""
   
-  numResultsShown = '75'
-  zipCode = '28226'
-  searchText = 'Truck'
-  distance = '40'
+
+
+  if len(sys.argv) > 1:
+    if sys.argv[1] > 100:
+      numResultsShown = 100
+    else:
+      numResultsShown = sys.argv[1]
+    zipCode = sys.argv[2]
+    searchText = 'Truck'
+    distance = sys.argv[3]
+  else:
+    numResultsShown = '75'
+    zipCode = '28226'
+    searchText = 'Truck'
+    distance = '40'
 
   # make a GET request to the vehicles endpoint
   page_url = f'https://www.carmax.com/cars/api/search/run?uri=%2Fcars%3Fsearch%3D{searchText}&skip={starting_value}&take={numResultsShown}&zipCode={zipCode}&radius={distance}&shipping=0&sort=20'
@@ -116,13 +127,3 @@ def main():
 
 if __name__ == "__main__":
   main()
-  
-
-
-# Need the stockNumber of a car within certain optional params (milage, type of car, etc) -> then use the stock number to get the price of the vehicle
-
-# store south blvd - 7197
-# within 250 miles
-# ford
-# truck
-# under 10 miles
