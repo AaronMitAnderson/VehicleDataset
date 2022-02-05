@@ -10,20 +10,21 @@ def get_page(starting_value = 0):
 
   if len(sys.argv) > 1:
     if sys.argv[1] > 100:
-      numResultsShown = 100
+      num_results_shown = 100
     else:
-      numResultsShown = sys.argv[1]
-    zipCode = sys.argv[2]
-    searchText = 'Truck'
+      num_results_shown = sys.argv[1]
+    zip_code = sys.argv[2]
+    search_text = 'Truck'
     distance = sys.argv[3]
   else:
-    numResultsShown = '75'
-    zipCode = '28226'
-    searchText = 'Truck'
+    num_results_shown = '75'
+    zip_code = '28226'
+    search_text = 'Truck'
     distance = '40'
 
   # make a GET request to the vehicles endpoint
-  page_url = f'https://www.carmax.com/cars/api/search/run?uri=%2Fcars%3Fsearch%3D{searchText}&skip={starting_value}&take={numResultsShown}&zipCode={zipCode}&radius={distance}&shipping=0&sort=20'
+  # page_url = f'https://www.carmax.com/cars/api/search/run?uri=%2Fcars%3Fsearch%3D{search_text}&skip={starting_value}&take={num_results_shown}&zipCode={zip_code}&radius={distance}&shipping=0&sort=20'
+  page_url = f'https://www.carmax.com/cars/api/search/run?uri=/cars/pickup-trucks&skip={starting_value}&take={num_results_shown}&zipCode=28227&radius=90&shipping=0&sort=20&scoringProfile=BestMatchScoreVariant3'
 
   # Headers needed to allow the CM api to respond
   payload={}
@@ -47,14 +48,14 @@ def get_page(starting_value = 0):
   print(page_url)
   # Attempt to get page, on timeout print error
   try:
-    response = requests.request("GET", page_url, headers=headers, data=payload, timeout=10)
+    response = requests.request("GET", page_url, headers=headers, data=payload, timeout=20)
   except TimeoutError:
     print('Request Timeout')
   else:
     print("Response Received")
     num_results = response.json()['totalCount']
 
-  count = numResultsShown
+  count = num_results_shown
   # Blank line for readability
   print()
 
@@ -75,7 +76,7 @@ def get_page(starting_value = 0):
 
 
 def make_car_dict(count, vehicles, num_results):
-  listOfCars = []
+  list_of_cars = []
   print(f'Number of total cars: {num_results}')
   
   # Make a dictionary entry of each vehicles data and append it to the list of cars while your total_count is less than the total number of results
@@ -83,7 +84,7 @@ def make_car_dict(count, vehicles, num_results):
   while True:
     for vehicle in vehicles:
       Type = f"{vehicle['year']} {vehicle['make']} {vehicle['model']} {vehicle['trim']}"
-      carDict = {"StockNumber": vehicle['stockNumber'],
+      car_dict = {"StockNumber": vehicle['stockNumber'],
                 "Price" : vehicle['basePrice'],
                 "MSRP" : vehicle['msrp'],
                 #  "Markdown" : vehicle['currentMarkdown'],
@@ -91,34 +92,34 @@ def make_car_dict(count, vehicles, num_results):
                 "Drive Train" : vehicle['driveTrain'],
                 "Location" : vehicle['storeName']+ ":" + vehicle['storeCity'],
                 "URL" : f"https://www.carmax.com/car/{vehicle['stockNumber']}"}
-      listOfCars.append(carDict)
+      list_of_cars.append(car_dict)
     if int(total_count) >= int(num_results):
       break
     count , vehicles, a = get_page(total_count)
     total_count = total_count + int(count)
 
   # Pull in the keys for the dictionary to act as the headers for the csv file
-  field_names = carDict.keys()
+  field_names = car_dict.keys()
 
   # write the list of dictionarys to a csv file
   with open('Cars.csv', 'w') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=field_names, lineterminator='\n') #lineterminator needed; DictWriter uses '/r/n' by default
     writer.writeheader()
-    writer.writerows(listOfCars)
+    writer.writerows(list_of_cars)
 
   # check for any cars under 30k and add them to a list.
   # This is my subsitute for a model. 
-  erroneousCars = []
-  for car in listOfCars:
+  erroneous_cars = []
+  for car in list_of_cars:
     if car['Price'] <= 30000:
-      erroneousCars.append(car)
+      erroneous_cars.append(car)
 
   print()
-  if erroneousCars == []:
+  if erroneous_cars == []:
     print("No mispriced Cars")
   else:
     print("Mispriced Cars:")
-    for misprice in erroneousCars:
+    for misprice in erroneous_cars:
       print(misprice)
 
 def main():
@@ -127,3 +128,4 @@ def main():
 
 if __name__ == "__main__":
   main()
+  
