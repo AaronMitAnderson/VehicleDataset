@@ -1,26 +1,28 @@
+from operator import index
 import requests
 from bs4 import BeautifulSoup
 import csv
 import sys
+import pandas as pd
 
 def get_page(starting_value = 0):
   """Get data for a page of 100 vehicles from the CarMax API."""
   
 
 
-  if len(sys.argv) > 1:
-    if sys.argv[1] > 100:
-      num_results_shown = 100
-    else:
-      num_results_shown = sys.argv[1]
-    zip_code = sys.argv[2]
-    search_text = 'Truck'
-    distance = sys.argv[3]
-  else:
-    num_results_shown = '75'
-    zip_code = '28226'
-    search_text = 'Truck'
-    distance = '40'
+  # if len(sys.argv) > 1:
+  #   if sys.argv[1] > 100:
+  #     num_results_shown = 100
+  #   else:
+  #     num_results_shown = sys.argv[1]
+  #   zip_code = sys.argv[2]
+  #   search_text = 'Truck'
+  #   distance = sys.argv[3]
+  # else:
+  num_results_shown = '75'
+  zip_code = '28226'
+  search_text = 'Truck'
+  distance = '40'
 
   # make a GET request to the vehicles endpoint
   # page_url = f'https://www.carmax.com/cars/api/search/run?uri=%2Fcars%3Fsearch%3D{search_text}&skip={starting_value}&take={num_results_shown}&zipCode={zip_code}&radius={distance}&shipping=0&sort=20'
@@ -107,6 +109,11 @@ def make_car_dict(count, vehicles, num_results):
     writer.writeheader()
     writer.writerows(list_of_cars)
 
+  
+  car_df = pd.DataFrame(list_of_cars, columns=field_names)
+  print(car_df)
+  car_df.to_csv('dfCars.csv')
+
   # check for any cars under 30k and add them to a list.
   # This is my subsitute for a model. 
   erroneous_cars = []
@@ -115,12 +122,12 @@ def make_car_dict(count, vehicles, num_results):
       erroneous_cars.append(car)
 
   print()
-  if erroneous_cars == []:
-    print("No mispriced Cars")
-  else:
-    print("Mispriced Cars:")
-    for misprice in erroneous_cars:
-      print(misprice)
+  # if erroneous_cars == []:
+  #   print("No mispriced Cars")
+  # else:
+  #   print("Mispriced Cars:")
+  #   for misprice in erroneous_cars:
+  #     print(misprice)
 
 def main():
   count, vehicles, num_results = get_page()
