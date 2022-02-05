@@ -92,6 +92,7 @@ def make_car_dict(count, vehicles, num_results):
                 #  "Markdown" : vehicle['currentMarkdown'],
                 "Type" : Type,
                 "Drive Train" : vehicle['driveTrain'],
+                "Mileage" : vehicle['mileage'],
                 "Location" : vehicle['storeName']+ ":" + vehicle['storeCity'],
                 "URL" : f"https://www.carmax.com/car/{vehicle['stockNumber']}"}
       list_of_cars.append(car_dict)
